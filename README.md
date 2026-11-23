@@ -18,9 +18,9 @@ Both the Server and Client GUIs are built with **NetBeans Swing GUI Builder (`.f
 ### Contribution Log
 | Date | Member | Task Description | Commit Link |
 | :--- | :--- | :--- | :--- |
-| 2026-11-10 | Alexander G. Banton (`@ZanyClaire`) | Wire protocol (`Protocol`), server core (`ChatServer`, `ClientHandler`, `Seat`), external configuration (`AppConfig`, `config.properties`), and Librarian Server Console (`ServerFrame.form`) | *(update with commit URL after push)* |
-| 2026-11-18 | Jharem S. Cante (`@JCante2501`) | Client networking (`ClientConnection`), Student Desktop Workspace (`ClientFrame.form`), per-student study timers UI, seat map interactions, and multi-client LAN testing | *(update with commit URL after partner push)* |
-| 2026-11-21 | Alexander G. Banton (`@ZanyClaire`) | Librarian live chat monitor, broadcast announcements, live Student Monitor table, approved-seat timer lock, and eye-comfort theme redesign | *(update with commit URL after push)* |
+| 2026-11-23 | Alexander G. Banton (`@ZanyClaire`) | Full server/client implementation (`Protocol`, `ChatServer`, `ClientHandler`, `Seat`, `ClientConnection`, `ServerFrame`, `ClientFrame`), Librarian monitoring console, seat-gated per-student timers, and eye-comfort theme | [`3a19d2a`](https://github.com/ZanyClaire/Library-Study-Hub/commit/3a19d2a3120c9b3524cca81d0fbb169f3c64680d) |
+| 2026-11-23 | Alexander G. Banton (`@ZanyClaire`) | Updated `README.md` with team members, concept proposal, labeled screenshots, test table, and citations | [`13651b1`](https://github.com/ZanyClaire/Library-Study-Hub/commit/13651b1453c8e38eaf5d7df1180f4fefe45a0162) |
+| 2026-11-23 | Jharem S. Cante (`@JCante2501`) | Added live message character counter (`AppConfig.maxMessageLength`), client-side length validation, Clear Chat button in `ClientFrame`, and 32-check automated multi-client test suite (`src/test/java/ProtocolTest.java`) | [`ca1ad2e`](https://github.com/ZanyClaire/Library-Study-Hub/commit/ca1ad2ee6aea17ba0d6d6acdcb32ccc706b62128) |
 
 ---
 
@@ -107,6 +107,11 @@ java -cp target\classes server.ServerFrame
 
 # Start Student Client (run in 3 terminals / across 2 LAN machines):
 java -cp target\classes client.ClientFrame
+
+# Run Automated 32-Check Multi-Client Test Suite:
+mkdir target\test-classes -Force
+javac -encoding UTF-8 -cp target\classes -d target\test-classes src\test\java\ProtocolTest.java
+java -cp "target\classes;target\test-classes" ProtocolTest
 ```
 
 ### Troubleshooting LAN Connections
