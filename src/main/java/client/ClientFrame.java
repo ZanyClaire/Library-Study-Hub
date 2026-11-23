@@ -12,6 +12,8 @@ import javax.swing.JOptionPane;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
@@ -54,6 +56,15 @@ public final class ClientFrame extends javax.swing.JFrame implements ClientConne
         minutesSpinner.setModel(new SpinnerNumberModel(
                 AppConfig.defaultTimerMinutes(), 1, AppConfig.maxTimerMinutes(), 1));
         timerProgress.setString("");
+        messageField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) { updateCharCount(); }
+            @Override
+            public void removeUpdate(DocumentEvent e) { updateCharCount(); }
+            @Override
+            public void changedUpdate(DocumentEvent e) { updateCharCount(); }
+        });
+        updateCharCount();
         setConnectedUi(false);
         appendSystem("Welcome to Library Study Hub. Enter the server IP, port and a nickname, then Connect.");
     }
@@ -112,6 +123,8 @@ public final class ClientFrame extends javax.swing.JFrame implements ClientConne
         chatPane.setForeground(body);
         chatPane.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
         inputPanel.setBackground(headerBg);
+        inputButtonsPanel.setBackground(headerBg);
+        charCountLabel.setForeground(headerSubFg);
         messageField.setBackground(paper);
         messageField.setForeground(body);
 
@@ -149,6 +162,8 @@ public final class ClientFrame extends javax.swing.JFrame implements ClientConne
         AppConfig.bindPrimaryButton(requestSeatButton);
         releaseSeatButton.setBackground(paper);
         releaseSeatButton.setForeground(navy);
+        clearChatButton.setBackground(secondary);
+        clearChatButton.setForeground(navy);
         AppConfig.bindPrimaryButton(sendButton);
     }
 
@@ -185,7 +200,10 @@ public final class ClientFrame extends javax.swing.JFrame implements ClientConne
         chatScroll = new javax.swing.JScrollPane();
         chatPane = new javax.swing.JTextPane();
         inputPanel = new javax.swing.JPanel();
+        charCountLabel = new javax.swing.JLabel();
         messageField = new javax.swing.JTextField();
+        inputButtonsPanel = new javax.swing.JPanel();
+        clearChatButton = new javax.swing.JButton();
         sendButton = new javax.swing.JButton();
         sidePanel = new javax.swing.JPanel();
         timerPanel = new javax.swing.JPanel();
@@ -357,6 +375,11 @@ public final class ClientFrame extends javax.swing.JFrame implements ClientConne
         inputPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(8, 10, 8, 10));
         inputPanel.setLayout(new java.awt.BorderLayout(8, 0));
 
+        charCountLabel.setFont(new java.awt.Font("SansSerif", 1, 11)); // NOI18N
+        charCountLabel.setForeground(new java.awt.Color(203, 221, 245));
+        charCountLabel.setText("0 / 500");
+        inputPanel.add(charCountLabel, java.awt.BorderLayout.LINE_START);
+
         messageField.setFont(new java.awt.Font("SansSerif", 0, 13)); // NOI18N
         messageField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -364,6 +387,20 @@ public final class ClientFrame extends javax.swing.JFrame implements ClientConne
             }
         });
         inputPanel.add(messageField, java.awt.BorderLayout.CENTER);
+
+        inputButtonsPanel.setBackground(new java.awt.Color(15, 37, 71));
+        inputButtonsPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 6, 0));
+
+        clearChatButton.setBackground(new java.awt.Color(221, 231, 243));
+        clearChatButton.setFont(new java.awt.Font("SansSerif", 1, 12)); // NOI18N
+        clearChatButton.setForeground(new java.awt.Color(27, 54, 93));
+        clearChatButton.setText("Clear Chat");
+        clearChatButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                clearChatButtonActionPerformed(evt);
+            }
+        });
+        inputButtonsPanel.add(clearChatButton);
 
         sendButton.setBackground(new java.awt.Color(29, 95, 214));
         sendButton.setFont(new java.awt.Font("SansSerif", 1, 13)); // NOI18N
@@ -374,7 +411,9 @@ public final class ClientFrame extends javax.swing.JFrame implements ClientConne
                 sendButtonActionPerformed(evt);
             }
         });
-        inputPanel.add(sendButton, java.awt.BorderLayout.LINE_END);
+        inputButtonsPanel.add(sendButton);
+
+        inputPanel.add(inputButtonsPanel, java.awt.BorderLayout.LINE_END);
 
         centerChatPanel.add(inputPanel, java.awt.BorderLayout.PAGE_END);
 
@@ -543,6 +582,11 @@ public final class ClientFrame extends javax.swing.JFrame implements ClientConne
         sendMessage();
     }//GEN-LAST:event_sendButtonActionPerformed
 
+    private void clearChatButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearChatButtonActionPerformed
+        chatPane.setText("");
+        appendSystem("Chat view cleared.");
+    }//GEN-LAST:event_clearChatButtonActionPerformed
+
     private void messageFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_messageFieldActionPerformed
         sendMessage();
     }//GEN-LAST:event_messageFieldActionPerformed
@@ -660,12 +704,26 @@ public final class ClientFrame extends javax.swing.JFrame implements ClientConne
             messageField.setText("");
             return;
         }
+        int maxLen = AppConfig.maxMessageLength();
+        if (text.length() > maxLen) {
+            appendError("Message too long (" + text.length() + "/" + maxLen + " characters). Shorten it before sending.");
+            return;
+        }
         if (text.trim().startsWith("/")) {
             send(Protocol.CMD, text.trim());     // the server validates every command
         } else {
             send(Protocol.CHAT, text);
         }
         messageField.setText("");
+    }
+
+    private void updateCharCount() {
+        int len = messageField.getText().length();
+        int maxLen = AppConfig.maxMessageLength();
+        charCountLabel.setText(len + " / " + maxLen);
+        charCountLabel.setForeground(len > maxLen
+                ? new Color(252, 165, 165)
+                : AppConfig.color("theme.headerSubFg", "#CBDDF5"));
     }
 
     private void sendSeatAction(String type) {
@@ -1034,8 +1092,10 @@ public final class ClientFrame extends javax.swing.JFrame implements ClientConne
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel brandLabel;
     private javax.swing.JPanel centerChatPanel;
+    private javax.swing.JLabel charCountLabel;
     private javax.swing.JTextPane chatPane;
     private javax.swing.JScrollPane chatScroll;
+    private javax.swing.JButton clearChatButton;
     private javax.swing.JLabel cmdExitLabel;
     private javax.swing.JLabel cmdHelpLabel;
     private javax.swing.JLabel cmdNameLabel;
@@ -1048,6 +1108,7 @@ public final class ClientFrame extends javax.swing.JFrame implements ClientConne
     private javax.swing.JScrollPane groupTimersScroll;
     private javax.swing.JTextField hostField;
     private javax.swing.JLabel hostLabel;
+    private javax.swing.JPanel inputButtonsPanel;
     private javax.swing.JPanel inputPanel;
     private javax.swing.JPanel leftSidebarPanel;
     private javax.swing.JTextField messageField;
