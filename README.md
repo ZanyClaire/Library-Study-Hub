@@ -31,7 +31,7 @@ Both the Server and Client GUIs are built with **NetBeans Swing GUI Builder (`.f
 - **Original Feature 1 — Independent Per-Student Study Timers (Seat-Gated):** Once a student's seat is approved by the Librarian, they can start their own focus timer with a custom duration and topic (e.g., 15 minutes for `History`, 25 minutes for `Math Review`). Students without an approved seat cannot start a timer, and releasing a seat resets any active timer. The server ticks all running timers once per second and broadcasts `TIMERS` updates so every client sees classmates' live countdowns in **Student Timers** and the Librarian sees them in the **Student Monitor** table.
 - **Original Feature 2 — Study Seat Request, Librarian Approval & Live Monitoring:** The server maintains the library seat table. Students click a free seat and click **Request Seat** (`PENDING`). On the **Librarian Server Console**, the librarian monitors live student chat, sends official `[Librarian]` announcements, views pending seat requests, and clicks **Approve** (`TAKEN`), **Deny** (`FREE`), or **Release** (`FREE`). All clients immediately receive the updated `SEATS` map, and disconnecting automatically frees any held seat.
 - **Sample Screens:** See **Section 7 (Labeled Application Screenshots)** below for the Librarian Server Console (`screenshots/server.png`), Student Workspace with Approved Seat & Running Timer (`screenshots/client-anna.png`), and Student Workspace with Pending Seat & Locked Timer (`screenshots/client-meguel.png`).
-- **Instructor & Approval Status:** Kent Joshua Espina — **Aprove**
+- **Instructor & Approval Status:** Kent Joshua Espina — **Approved (November 23, 2026)**
 
 ---
 
